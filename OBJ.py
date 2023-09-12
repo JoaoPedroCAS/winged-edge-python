@@ -1,44 +1,44 @@
-import random  # Importa o módulo random para possíveis usos futuros
+import random
 
 # Definindo a classe Vertex (vértice)
 class Vertex:
     def __init__(self, vertex_id):
-        self.vertex_id = vertex_id  # Atribui um ID único a cada vértice
-        self.edges = []  # Lista de arestas conectadas a este vértice
-        self.faces = []  # Lista de faces conectadas a este vértice
+        self.vertex_id = vertex_id  # Inicializa o ID do vértice
+        self.edges = []  # Inicializa uma lista vazia para armazenar as arestas conectadas a este vértice
+        self.faces = []  # Inicializa uma lista vazia para armazenar as faces conectadas a este vértice
 
 # Definindo a classe Edge (aresta)
 class Edge:
     def __init__(self, vertex1, vertex2):
-        self.vertex1 = vertex1  # Primeiro vértice da aresta
-        self.vertex2 = vertex2  # Segundo vértice da aresta
-        self.faces = []  # Lista de faces conectadas a esta aresta
+        self.vertex1 = vertex1  # Inicializa o primeiro vértice da aresta
+        self.vertex2 = vertex2  # Inicializa o segundo vértice da aresta
+        self.faces = []  # Inicializa uma lista vazia para armazenar as faces conectadas a esta aresta
 
 # Definindo a classe Face (face)
 class Face:
     def __init__(self, vertices):
-        self.vertices = vertices  # Lista de vértices que compõem a face
-        self.edges = []  # Lista de arestas que compõem a face
+        self.vertices = vertices  # Inicializa a lista de vértices que compõem a face
+        self.edges = []  # Inicializa uma lista vazia para armazenar as arestas que compõem a face
 
 # Função para construir a estrutura de dados Winged Edge
 def build_winged_edge_structure(file_path):
-    vertices = []  # Lista de vértices
-    edges = []  # Lista de arestas
-    faces = []  # Lista de faces
+    vertices = []  # Inicializa uma lista vazia para armazenar os vértices do modelo
+    edges = []  # Inicializa uma lista vazia para armazenar as arestas do modelo
+    faces = []  # Inicializa uma lista vazia para armazenar as faces do modelo
 
     # Abre o arquivo OBJ especificado para leitura
     with open(file_path, 'r') as file:
         for line in file:
             if line.startswith('v '):
                 # Processa as linhas que começam com 'v ' como vértices
-                values = line.split()[1:]  # Separa os valores da linha
-                vertex = Vertex(len(vertices) + 1)  # Cria um novo vértice com ID único
+                values = line.split()[1:]  # Divide a linha em valores
+                vertex = Vertex(len(vertices) + 1)  # Cria um novo vértice com um ID único
                 vertices.append(vertex)  # Adiciona o vértice à lista de vértices
             elif line.startswith('f '):
                 # Processa as linhas que começam com 'f ' como faces
-                values = line.split()[1:]  # Separa os valores da linha
-                vertex_ids = [int(v.split('/')[0]) for v in values]  # Extrai IDs dos vértices
-                face = Face([vertices[id - 1] for id in vertex_ids])  # Cria uma nova face com vértices
+                values = line.split()[1:]  # Divide a linha em valores
+                vertex_ids = [int(v.split('/')[0]) for v in values]  # Extrai os IDs dos vértices
+                face = Face([vertices[id - 1] for id in vertex_ids])  # Cria uma nova face com base nos vértices
                 faces.append(face)  # Adiciona a face à lista de faces
 
     # Conecta vértices, arestas e faces
@@ -66,44 +66,92 @@ def build_winged_edge_structure(file_path):
 
     return vertices, edges, faces  # Retorna as listas de vértices, arestas e faces
 
-# Loop para carregar objetos e consultar informações
+# Função para listar informações sobre vértices
+def list_vertex_info(vertices):
+    selected_vertex_id = int(input("Enter the vertex ID you want to access faces: "))  # Solicita o ID do vértice
+
+    # Verificação de ID válido para vértices
+    if selected_vertex_id < 1 or selected_vertex_id > len(vertices):
+        print("Error: Vertex does not exist!")
+    else:
+        vertex = vertices[selected_vertex_id - 1]  # Obtém o vértice correspondente com base no ID
+        shared_faces = vertex.faces  # Lista de faces compartilhadas pelo vértice
+
+        if not shared_faces:
+            print(f"No faces shared by vertex {selected_vertex_id}")
+        else:
+            print(f"Faces shared by vertex {selected_vertex_id}:")
+            for face in shared_faces:
+                vertex_ids_face = ', '.join(str(v.vertex_id) for v in face.vertices)
+                print(f"Face vertices: [{vertex_ids_face}]")
+
+# Função para listar informações sobre arestas
+def list_edge_info(edges):
+    selected_edge_id = int(input("Enter the edge ID you want to access edges: "))  # Solicita o ID da aresta
+
+    # Verificação de ID válido para arestas
+    if selected_edge_id < 1 or selected_edge_id > len(edges):
+        print("Error: Edge does not exist!")
+    else:
+        edge = edges[selected_edge_id - 1]  # Obtém a aresta correspondente com base no ID
+        shared_faces = edge.faces  # Lista de faces compartilhadas pela aresta
+
+        if not shared_faces:
+            print(f"No faces shared by edge {selected_edge_id}")
+        else:
+            print(f"Faces shared by edge {selected_edge_id}:")
+            for face in shared_faces:
+                vertex1_id = face.vertices[0].vertex_id
+                vertex2_id = face.vertices[1].vertex_id
+                print(f"Edge vertices: {vertex1_id}, {vertex2_id}")
+
+# Função para listar informações sobre faces
+def list_face_info(faces):
+    selected_face_id = int(input("Enter the face ID you want to access vertices: "))  # Solicita o ID da face
+
+    # Verificação de ID válido para faces
+    if selected_face_id < 1 or selected_face_id > len(faces):
+        print("Error: Face does not exist!")
+    else:
+        face = faces[selected_face_id - 1]  # Obtém a face correspondente com base no ID
+        shared_vertices = face.vertices  # Lista de vértices
+
+        if not shared_vertices:
+            print(f"No vertices in face {selected_face_id}")
+        else:
+            print(f"Vertices in face {selected_face_id}:")
+            for shared_vertex in shared_vertices:
+                print(f"Vertex ID: {shared_vertex.vertex_id}")
+
+# Loop principal para carregar objetos e consultar informações
 while True:
     chosen_object = input("Enter the name of the object you want to load (cube, square, circle, etc.): ")
-    object_file = f'{chosen_object}.obj'  # Constrói o nome do arquivo OBJ com base na entrada do usuário
+    object_file = f'{chosen_object}.obj'
+
     try:
-        vertices, edges, faces = build_winged_edge_structure(object_file)  # Tenta construir a estrutura
-        break  # Sai do loop se o arquivo for encontrado
+        vertices, edges, faces = build_winged_edge_structure(object_file)
+        break
     except FileNotFoundError:
-        print("Object not found. Please try again.")  # Manipula a exceção se o arquivo não for encontrado
+        print("Object not found. Please try again.")
 
-selected_vertex_id = int(input("Enter the vertex ID you want to access faces: "))  # Solicita o ID do vértice
-selected_edge_id = int(input("Enter the edge ID you want to access edges: "))  # Solicita o ID da aresta
-selected_face_id = int(input("Enter the face ID you want to access vertices: "))  # Solicita o ID da face
+# Menu interativo para listar informações
+while True:
+    print("\nMenu:")
+    print("1. List information about vertices")
+    print("2. List information about edges")
+    print("3. List information about faces")
+    print("4. Exit")
+    
+    choice = input("Enter your choice (1/2/3/4): ")
 
-vertex_id = selected_vertex_id  # Atribui o ID do vértice selecionado
-if vertex_id < 1 or vertex_id > len(vertices):
-    print("Error: Vertex does not exist!")  # Verifica se o ID do vértice é válido e exibe uma mensagem de erro, se necessário
-else:
-    vertex = vertices[vertex_id - 1]  # Obtém o vértice correspondente com base no ID
-    shared_faces = [face for face in vertex.faces]  # Lista de faces compartilhadas pelo vértice
-    print(f"Faces shared by vertex {vertex_id}:")
-    for face in shared_faces:
-        vertex_ids_face = ', '.join(str(v.vertex_id) for v in face.vertices)
-        print(f"Face: {vertex_ids_face}")  # Exibe as faces compartilhadas pelo vértice
-
-edge_id = selected_edge_id  # Atribui o ID da aresta selecionada
-if edge_id < 1 or edge_id > len(vertices):
-    print("Error: Edge does not exist!")  # Verifica se o ID da aresta é válido e exibe uma mensagem de erro, se necessário
-else:
-    edge = edges[edge_id - 1]  # Obtém a aresta correspondente com base no ID
-    shared_edges = [edge for edge in vertex.edges]  # Lista de arestas compartilhadas pelo vértice
-    print(f"Edges shared by vertex {edge_id}:")
-    for shared_edge in shared_edges:
-        print(shared_edge.vertex1.vertex_id, shared_edge.vertex2.vertex_id)  # Exibe as arestas compartilhadas pelo vértice
-
-face_id = selected_face_id  # Atribui o ID da face selecionada
-if face_id < 1 or face_id > len(faces):
-    print("Error: Face does not exist!")  # Verifica se o ID da face é válido e exibe uma mensagem de erro, se necessário
-else:
-    face = faces[face_id - 1]  # Obtém a face correspondente com base no ID
-    shared_vertices = [vertex for vertex in face.vertices]  # Lista de vértices
+    if choice == "1":
+        list_vertex_info(vertices)
+    elif choice == "2":
+        list_edge_info(edges)
+    elif choice == "3":
+        list_face_info(faces)
+    elif choice == "4":
+        print("Exiting the program.")
+        break
+    else:
+        print("Invalid choice. Please enter a valid option.")
