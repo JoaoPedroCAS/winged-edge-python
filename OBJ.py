@@ -1,4 +1,5 @@
-import random
+import PySimpleGUI as sg
+import os
 
 # Definindo a classe Vertex (vértice)
 class Vertex:
@@ -67,91 +68,130 @@ def build_winged_edge_structure(file_path):
     return vertices, edges, faces  # Retorna as listas de vértices, arestas e faces
 
 # Função para listar informações sobre vértices
-def list_vertex_info(vertices):
-    selected_vertex_id = int(input("Enter the vertex ID you want to access faces: "))  # Solicita o ID do vértice
-
+def list_vertex_info(vertices,selected_vertex_id):
+    Vlist = ""
     # Verificação de ID válido para vértices
     if selected_vertex_id < 1 or selected_vertex_id > len(vertices):
-        print("Error: Vertex does not exist!")
+        sg.popup("Error: Vertex does not exist!")
     else:
         vertex = vertices[selected_vertex_id - 1]  # Obtém o vértice correspondente com base no ID
         shared_faces = vertex.faces  # Lista de faces compartilhadas pelo vértice
 
         if not shared_faces:
-            print(f"No faces shared by vertex {selected_vertex_id}")
+            sg.popup(f"No faces shared by vertex {selected_vertex_id}")
         else:
-            print(f"Faces shared by vertex {selected_vertex_id}:")
+            
             for face in shared_faces:
                 vertex_ids_face = ', '.join(str(v.vertex_id) for v in face.vertices)
-                print(f"Face vertices: [{vertex_ids_face}]")
-
+                Vlist = Vlist + '\n' +  str(vertex_ids_face)
+                #print(f"Face vertices: [{vertex_ids_face}]")
+            sg.popup(f"Faces shared by vertex {selected_vertex_id}:", Vlist)
+    
+    
 # Função para listar informações sobre arestas
-def list_edge_info(edges):
-    selected_edge_id = int(input("Enter the edge ID you want to access edges: "))  # Solicita o ID da aresta
-
+def list_edge_info(edges,selected_edge_id):
+    Elist = ""
+    
     # Verificação de ID válido para arestas
     if selected_edge_id < 1 or selected_edge_id > len(edges):
-        print("Error: Edge does not exist!")
+        sg.popup("Error: Edge does not exist!")
     else:
         edge = edges[selected_edge_id - 1]  # Obtém a aresta correspondente com base no ID
         shared_faces = edge.faces  # Lista de faces compartilhadas pela aresta
 
         if not shared_faces:
-            print(f"No faces shared by edge {selected_edge_id}")
+            sg.popup(f"No faces shared by edge {selected_edge_id}")
         else:
-            print(f"Faces shared by edge {selected_edge_id}:")
             for face in shared_faces:
                 vertex1_id = face.vertices[0].vertex_id
                 vertex2_id = face.vertices[1].vertex_id
-                print(f"Edge vertices: {vertex1_id}, {vertex2_id}")
+                Elist = Elist +  (f"Edge vertices: {vertex1_id}, {vertex2_id}" + "\n")  
+            sg.popup(f"Faces shared by edge {selected_edge_id}:",Elist)
 
 # Função para listar informações sobre faces
-def list_face_info(faces):
-    selected_face_id = int(input("Enter the face ID you want to access vertices: "))  # Solicita o ID da face
-
+def list_face_info(faces,selected_face_id):
+    Vlist = ""
+    # Verificação de ID válido para faces
     # Verificação de ID válido para faces
     if selected_face_id < 1 or selected_face_id > len(faces):
-        print("Error: Face does not exist!")
+        sg.popup("Error: Face does not exist!")
     else:
         face = faces[selected_face_id - 1]  # Obtém a face correspondente com base no ID
         shared_vertices = face.vertices  # Lista de vértices
 
         if not shared_vertices:
-            print(f"No vertices in face {selected_face_id}")
+            sg.popup(f"No vertices in face {selected_face_id}")
         else:
-            print(f"Vertices in face {selected_face_id}:")
             for shared_vertex in shared_vertices:
-                print(f"Vertex ID: {shared_vertex.vertex_id}")
+                Vlist = Vlist + (f"Vertex ID: {shared_vertex.vertex_id}" + "\n")
+            sg.popup(f"Vertices in face {selected_face_id}:", Vlist)
+            
 
-# Loop principal para carregar objetos e consultar informações
+
+
+
+sg.theme('DarkAmber')   # Add a touch of color
+# All the stuff inside your window.
+layout = [  [sg.Text('Winged Edge Structure')],
+            [sg.Text('Enter the name of the object you want to load (cube, square, circle, etc.):'), sg.InputText()],
+            [sg.Button('Ok'), sg.Button('Cancel')] ]
+
+# Create the Window
+window = sg.Window('Window Title', layout)
+# Event Loop to process "events" and get the "values" of the inputs
 while True:
-    chosen_object = input("Enter the name of the object you want to load (cube, square, circle, etc.): ")
-    object_file = f'{chosen_object}.obj'
+    event, values = window.read()
+    if event == sg.WIN_CLOSED or event == 'Cancel': # if user closes window or clicks cancel
+        break
 
+    chosen_object = values[0]
+    path = os.path.dirname(os.path.abspath(__file__))   #Obtem a pasta atual
+    path = path + "\\" + chosen_object + ".obj"
+
+    object_file = path
+    
     try:
         vertices, edges, faces = build_winged_edge_structure(object_file)
+        sg.popup('Object loaded succefully!')
         break
     except FileNotFoundError:
         print("Object not found. Please try again.")
+        sg.popup('Object not found. Please try again.')
 
-# Menu interativo para listar informações
-while True:
-    print("\nMenu:")
-    print("1. List information about vertices")
-    print("2. List information about edges")
-    print("3. List information about faces")
-    print("4. Exit")
-    
-    choice = input("Enter your choice (1/2/3/4): ")
+window.close()
 
-    if choice == "1":
-        list_vertex_info(vertices)
-    elif choice == "2":
-        list_edge_info(edges)
-    elif choice == "3":
-        list_face_info(faces)
-    elif choice == "4":
-        print("Exiting the program.")
+layout = [  [sg.Text('Some text on Row 1')],
+            [sg.Text('Enter the vertex ID you want to access faces:'), sg.InputText()],
+            [sg.Text('Enter the edge ID you want to access edges:'), sg.InputText()],
+            [sg.Text('Enter the face ID you want to access vertices:'), sg.InputText()],
+            [sg.OK(), sg.Cancel()]]
+
+# Create the Window
+window = sg.Window('Window Title', layout)
+# Event Loop to process "events"
+while True:             
+    event, values = window.read()
+    if event in (sg.WIN_CLOSED, 'Cancel'):
         break
-    else:
-        print("Invalid choice. Please enter a valid option.")
+    
+    if values[0] == "" and values[1] == "" and  values[2] == "" :             #no informatio was given 
+        sg.popup('Error: No information requested!')
+        continue    
+    if (values[0] != "" and values[1] != "") or  (values[0] != "" and values[2] != "") or  (values[1] != "" and values[2] != ""):
+        sg.popup('Error: More then one information requested!')  
+        continue
+
+    if  values[0] != "":                          #fist fild requested
+        operation = int(values[0])
+        list_vertex_info(vertices,operation) 
+    
+    if  values[1] != "":                          #second fild requested
+        operation = int(values[1])
+        list_edge_info(edges,operation)
+
+    if  values[2] != "":                          #third fild requested
+        operation = int(values[2])
+        list_face_info(faces,operation)
+
+
+window.close()
