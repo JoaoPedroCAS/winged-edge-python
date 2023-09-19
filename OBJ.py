@@ -1,9 +1,18 @@
+# Importa a biblioteca PySimpleGUI para criar uma interface gráfica simples.
 import PySimpleGUI as sg
+
+# Importa a biblioteca os para manipular caminhos de arquivo.
 import os
 
 # Definindo a classe Vertex (vértice)
 class Vertex:
     def __init__(self, vertex_id):
+        """
+        Inicializa um objeto Vertex com um ID único.
+
+        Args:
+            vertex_id (int): O ID único do vértice.
+        """
         self.vertex_id = vertex_id  # Inicializa o ID do vértice
         self.edges = []  # Inicializa uma lista vazia para armazenar as arestas conectadas a este vértice
         self.faces = []  # Inicializa uma lista vazia para armazenar as faces conectadas a este vértice
@@ -11,21 +20,49 @@ class Vertex:
 # Definindo a classe Edge (aresta)
 class Edge:
     def __init__(self, vertex1, vertex2):
+        """
+        Inicializa um objeto Edge com dois vértices.
+
+        Args:
+            vertex1 (Vertex): O primeiro vértice da aresta.
+            vertex2 (Vertex): O segundo vértice da aresta.
+        """
         self.vertex1 = vertex1  # Inicializa o primeiro vértice da aresta
         self.vertex2 = vertex2  # Inicializa o segundo vértice da aresta
         self.face_ids = []  # Inicializa uma lista vazia para armazenar os IDs das faces conectadas a esta aresta
 
     def add_face(self, face_id):
+        """
+        Adiciona o ID de uma face conectada à aresta.
+
+        Args:
+            face_id (int): O ID da face conectada à aresta.
+        """
         self.face_ids.append(face_id)
 
 # Definindo a classe Face (face)
 class Face:
     def __init__(self, vertices):
+        """
+        Inicializa um objeto Face com uma lista de vértices.
+
+        Args:
+            vertices (list): Uma lista de vértices que compõem a face.
+        """
         self.vertices = vertices  # Inicializa a lista de vértices que compõem a face
         self.edges = []  # Inicializa uma lista vazia para armazenar as arestas que compõem a face
 
 # Função para construir a estrutura de dados Winged Edge
 def build_winged_edge_structure(file_path):
+    """
+    Constrói a estrutura de dados Winged Edge com base em um arquivo OBJ.
+
+    Args:
+        file_path (str): O caminho para o arquivo OBJ a ser lido.
+
+    Returns:
+        tuple: Uma tupla contendo listas de vértices, arestas e faces.
+    """
     vertices = []  # Inicializa uma lista vazia para armazenar os vértices do modelo
     edges = []  # Inicializa uma lista vazia para armazenar as arestas do modelo
     faces = []  # Inicializa uma lista vazia para armazenar as faces do modelo
@@ -72,6 +109,13 @@ def build_winged_edge_structure(file_path):
 
 # Função para listar informações sobre vértices
 def list_vertex_info(vertex, edges):
+    """
+    Lista as arestas compartilhadas por um vértice.
+
+    Args:
+        vertex (Vertex): O vértice para o qual as informações serão listadas.
+        edges (list): A lista de todas as arestas no modelo.
+    """
     if not vertex:
         sg.popup("Error: Vertex does not exist!")
         return
@@ -86,6 +130,13 @@ def list_vertex_info(vertex, edges):
 
 # Função para listar informações sobre arestas
 def list_edge_info(edges, selected_edge_id):
+    """
+    Lista as faces compartilhadas por uma aresta.
+
+    Args:
+        edges (list): A lista de todas as arestas no modelo.
+        selected_edge_id (int): O ID da aresta para a qual as informações serão listadas.
+    """
     Flist = ""
 
     # Verificação de ID válido para arestas
@@ -102,6 +153,13 @@ def list_edge_info(edges, selected_edge_id):
 
 # Função para listar informações sobre faces
 def list_face_info(faces, selected_face_id):
+    """
+    Lista os vértices que compõem uma face.
+
+    Args:
+        faces (list): A lista de todas as faces no modelo.
+        selected_face_id (int): O ID da face para a qual as informações serão listadas.
+    """
     Vlist = ""
     # Verificação de ID válido para faces
     if selected_face_id < 1 or selected_face_id > len(faces):
@@ -117,15 +175,16 @@ def list_face_info(faces, selected_face_id):
                 Vlist = Vlist + (f"Vertex ID: {shared_vertex.vertex_id}" + "\n")
             sg.popup(f"Vertices in face {selected_face_id}:", Vlist)
 
+# Configuração do tema da interface gráfica
 sg.theme('DarkAmber')  # Adicione um toque de cor
 
-# Todas as coisas dentro da sua janela.
+# Layout da janela principal
 layout = [[sg.Text('Winged Edge Structure')],
           [sg.Text('Enter the name of the object you want to load (cube, square, circle, etc.):'),
            sg.InputText()],
           [sg.Button('Ok'), sg.Button('Cancel')]]
 
-# Crie a Janela
+# Cria a Janela principal
 window = sg.Window('Window Title', layout)
 
 # Loop de Eventos para processar "eventos" e obter os "valores" das entradas
@@ -150,13 +209,14 @@ while True:
 
 window.close()
 
+# Layout da janela secundária
 layout = [[sg.Text('Some text on Row 1')],
           [sg.Text('Enter the vertex ID you want to access edges:'), sg.InputText()],
           [sg.Text('Enter the edge ID you want to access faces:'), sg.InputText()],
           [sg.Text('Enter the face ID you want to access vertices:'), sg.InputText()],
           [sg.OK(), sg.Cancel()]]
 
-# Crie a Janela
+# Cria a Janela secundária
 window = sg.Window('Window Title', layout)
 
 # Loop de Eventos para processar "eventos"
